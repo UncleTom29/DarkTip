@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Menu, X, Shield, Zap, Users, LayoutDashboard } from "lucide-react";
+import { Menu, X, Shield, Zap, Users, LayoutDashboard, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UniversalWalletButton } from "@/components/wallet/UniversalWalletButton";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/creators", label: "Creators", icon: Users },
   { href: "/grants", label: "Grants", icon: Zap },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "https://registry.scalar.com/@radr/apis/shadowpay-api", label: "Docs", icon: BookOpen, external: true },
 ];
 
 export function Header() {
@@ -39,27 +40,50 @@ export function Header() {
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
+              const isExternal = 'external' in link && link.external;
 
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "text-white"
-                      : "text-gray-400 hover:text-white hover:bg-gray-800/50"
-                  )}
-                >
+              const linkContent = (
+                <>
                   <Icon className="h-4 w-4" />
                   {link.label}
-                  {isActive && (
+                  {isActive && !isExternal && (
                     <motion.div
                       layoutId="activeNav"
                       className="absolute inset-0 rounded-lg bg-purple-500/20 border border-purple-500/30"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
+                </>
+              );
+
+              const linkClassName = cn(
+                "relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                isActive && !isExternal
+                  ? "text-white"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+              );
+
+              if (isExternal) {
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={linkClassName}
+                  >
+                    {linkContent}
+                  </a>
+                );
+              }
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={linkClassName}
+                >
+                  {linkContent}
                 </Link>
               );
             })}
@@ -97,18 +121,37 @@ export function Header() {
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = pathname === link.href;
+                const isExternal = 'external' in link && link.external;
+
+                const mobileClassName = cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                  isActive && !isExternal
+                    ? "text-white bg-purple-500/20"
+                    : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                );
+
+                if (isExternal) {
+                  return (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={mobileClassName}
+                    >
+                      <Icon className="h-5 w-5" />
+                      {link.label}
+                    </a>
+                  );
+                }
 
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                      isActive
-                        ? "text-white bg-purple-500/20"
-                        : "text-gray-400 hover:text-white hover:bg-gray-800/50"
-                    )}
+                    className={mobileClassName}
                   >
                     <Icon className="h-5 w-5" />
                     {link.label}
